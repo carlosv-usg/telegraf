@@ -22,7 +22,6 @@ func (s *Shim) AddOutput(output telegraf.Output) error {
 }
 
 func (s *Shim) RunOutput() error {
-	// TODO: ? Need to support multiple parsers, but not clear how.
 	parser, err := parsers.NewInfluxParser()
 	if err != nil {
 		return fmt.Errorf("Failed to create new parser: %w", err)
@@ -40,10 +39,11 @@ func (s *Shim) RunOutput() error {
 	for scanner.Scan() {
 		m, err = parser.ParseLine(scanner.Text())
 		if err != nil {
-			fmt.Fprintf(s.stderr, "Failed to parse metric: %s\b", err)
+			fmt.Fprintf(s.stderr, "Failed to parse metric: %s\n", err)
+			continue
 		}
 		if err = s.Output.Write([]telegraf.Metric{m}); err != nil {
-			fmt.Fprintf(s.stderr, "Failed to write metric: %s\b", err)
+			fmt.Fprintf(s.stderr, "Failed to write metric: %s\n", err)
 		}
 	}
 
